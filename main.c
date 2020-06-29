@@ -110,7 +110,7 @@ int video_deinterlace_test(void)
         return 1;
     }
 
-   // set clock scale
+  // set clock scale
     OMX_TIME_CONFIG_SCALETYPE cscale;
     OMX_INIT_STRUCTURE(cscale);
     cscale.xScale = 0x00010000;  // 1x
@@ -126,7 +126,7 @@ int video_deinterlace_test(void)
         return 1;
     }
 
-   // create video_scheduler
+  // create video_scheduler
     if(ilclient_create_component(client, &video_scheduler, "video_scheduler", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_create_component(video_scheduler) failed!\n");
@@ -139,7 +139,7 @@ int video_deinterlace_test(void)
     set_tunnel(tunnel+1, video_scheduler, 11, video_render, 90);
     set_tunnel(tunnel+2, clock, 80, video_scheduler, 12);
 
-   // setup clock tunnel first
+  // setup clock tunnel first
     if(ilclient_setup_tunnel(tunnel+2, 0, 0) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_setup_tunnel(+2) failed!\n");
@@ -370,10 +370,8 @@ int video_deinterlace_test(void)
         fprintf(stderr, "Error: OMX_EmptyThisBuffer(image_fx, OMX_BUFFERFLAG_EOS) failed!\n");
     }
 
-    // wait for EOS from render
     ilclient_wait_for_event(video_render, OMX_EventBufferFlag, 90, 0, OMX_BUFFERFLAG_EOS, 0, ILCLIENT_BUFFER_FLAG_EOS, -1);
 
-    // need to flush the renderer to allow image_fx to disable its input port
     ilclient_flush_tunnels(tunnel, 0);
     ilclient_disable_tunnel(tunnel);
     ilclient_disable_tunnel(tunnel+1);
