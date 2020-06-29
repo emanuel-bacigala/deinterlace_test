@@ -1,0 +1,7 @@
+Raspberry Pi OMX image_fx component test
+
+Uncomment required OMX_ImageFilter* in main.c
+
+make
+
+cat sample.yuv | ./main

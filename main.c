@@ -1,4 +1,3 @@
-// kuk: https://www.raspberrypi.org/forums/viewtopic.php?t=54773
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
