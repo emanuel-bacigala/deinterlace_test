@@ -22,6 +22,7 @@ OMX_TICKS ToOMXTime(int64_t pts)
     OMX_TICKS ticks;
     ticks.nLowPart = pts;
     ticks.nHighPart = pts >> 32;
+
     return ticks;
 }
 
@@ -30,25 +31,25 @@ int video_deinterlace_test(void)
 {
     ILCLIENT_T *client;
     COMPONENT_T *image_fx = NULL, *video_scheduler = NULL, *video_render = NULL, *clock = NULL;
-    COMPONENT_T *list[4+1];  // musi byt zakoncene nulou (+1), aby ilclient_flush_tunnels(),ilclient_teardown_tunnels(),
-    TUNNEL_T tunnel[3+1];    // ilclient_state_transition(), ilclient_cleanup_components(), ... nezatuhli (musia vediet, kde skoncit)
+    COMPONENT_T *list[4+1];
+    TUNNEL_T tunnel[3+1];
 
     memset(list, 0, sizeof(list));
     memset(tunnel, 0, sizeof(tunnel));
 
-    if((client = ilclient_init()) == NULL)
+    if ((client = ilclient_init()) == NULL)
     {
       return 1;
     }
 
-    if(OMX_Init() != OMX_ErrorNone)
+    if (OMX_Init() != OMX_ErrorNone)
     {
         ilclient_destroy(client);
         return 1;
     }
 
   // create image_fx
-    if(ilclient_create_component(client, &image_fx, "image_fx", ILCLIENT_DISABLE_ALL_PORTS | ILCLIENT_ENABLE_INPUT_BUFFERS) != OMX_ErrorNone)
+    if (ilclient_create_component(client, &image_fx, "image_fx", ILCLIENT_DISABLE_ALL_PORTS | ILCLIENT_ENABLE_INPUT_BUFFERS) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_create_component(image_fx) failed!\n");
         return 1;
@@ -68,14 +69,13 @@ int video_deinterlace_test(void)
         return 1;
     }
 */
-
 /*
   // extra buffers ?
    OMX_PARAM_U32TYPE extra_buffers;
    OMX_INIT_STRUCTURE(extra_buffers);
    extra_buffers.nU32 = -2;
 
-   if (OMX_SetParameter(ILC_GET_HANDLE(image_filter), OMX_IndexParamBrcmExtraBuffers, &extra_buffers) != OMX_ErrorNone)
+   if (OMX_SetParameter(ILC_GET_HANDLE(image_fx), OMX_IndexParamBrcmExtraBuffers, &extra_buffers) != OMX_ErrorNone)
    {
        fprintf(stderr, "%s() - Error: OMX_SetParameter(image_fx, OMX_IndexParamBrcmExtraBuffers) failed!\n", __FUNCTION__);
        return 1;
@@ -83,7 +83,7 @@ int video_deinterlace_test(void)
 */
 
   // create video_render
-    if(ilclient_create_component(client, &video_render, "video_render", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
+    if (ilclient_create_component(client, &video_render, "video_render", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_create_component(video_render) failed!\n");
         return 1;
@@ -92,7 +92,7 @@ int video_deinterlace_test(void)
     list[1] = video_render;
 
   // create clock
-    if(ilclient_create_component(client, &clock, "clock", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
+    if (ilclient_create_component(client, &clock, "clock", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_create_component(clock) failed!\n");
         return 1;
@@ -104,7 +104,7 @@ int video_deinterlace_test(void)
     OMX_INIT_STRUCTURE(cstate);
     cstate.eState = OMX_TIME_ClockStateWaitingForStartTime;
     cstate.nWaitMask = 1;
-    if(OMX_SetParameter(ILC_GET_HANDLE(clock), OMX_IndexConfigTimeClockState, &cstate) != OMX_ErrorNone)
+    if (OMX_SetParameter(ILC_GET_HANDLE(clock), OMX_IndexConfigTimeClockState, &cstate) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: OMX_SetParameter(clock, OMX_IndexConfigTimeClockState) failed!\n");
         return 1;
@@ -120,14 +120,14 @@ int video_deinterlace_test(void)
     //cscale.xScale = 0x00000A3D;  // 1/25x
     //cscale.xScale = 0x00000888;  // 1/30x
 
-    if(OMX_SetParameter(ILC_GET_HANDLE(clock), OMX_IndexConfigTimeScale, &cscale) != OMX_ErrorNone)
+    if (OMX_SetParameter(ILC_GET_HANDLE(clock), OMX_IndexConfigTimeScale, &cscale) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: OMX_SetParameter(clock,OMX_IndexConfigTimeScale) failed!\n");
         return 1;
     }
 
   // create video_scheduler
-    if(ilclient_create_component(client, &video_scheduler, "video_scheduler", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
+    if (ilclient_create_component(client, &video_scheduler, "video_scheduler", ILCLIENT_DISABLE_ALL_PORTS) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_create_component(video_scheduler) failed!\n");
         return 1;
@@ -140,7 +140,7 @@ int video_deinterlace_test(void)
     set_tunnel(tunnel+2, clock, 80, video_scheduler, 12);
 
   // setup clock tunnel first
-    if(ilclient_setup_tunnel(tunnel+2, 0, 0) != OMX_ErrorNone)
+    if (ilclient_setup_tunnel(tunnel+2, 0, 0) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_setup_tunnel(+2) failed!\n");
         return 1;
@@ -180,7 +180,7 @@ int video_deinterlace_test(void)
         return 1;
     }
 
-    portdef.nBufferCountActual = 4;  // set input buffer count (max. 153 original 1)
+    portdef.nBufferCountActual = 3;  // set input buffer count (max. 153 original 1)
 
     portdef.format.image.nFrameWidth = 720;
     portdef.format.image.nFrameHeight = 576;
@@ -204,7 +204,7 @@ int video_deinterlace_test(void)
 
     fprintf(stderr, "image_fx input buffer count=%d\n", portdef.nBufferCountActual);
 
-    if(ilclient_enable_port_buffers(image_fx, 190, NULL, NULL, NULL) != OMX_ErrorNone)
+    if (ilclient_enable_port_buffers(image_fx, 190, NULL, NULL, NULL) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: ilclient_enable_port_buffers(image_fx, 190) failed!\n");
         return 1;
@@ -239,10 +239,16 @@ int video_deinterlace_test(void)
     image_format.nParams[1] = 0;
     image_format.nParams[2] = 0;
     image_format.nParams[3] = 1;
-    image_format.eImageFilter = OMX_ImageFilterNegative;
+    //image_format.eImageFilter = OMX_ImageFilterNegative;
     //image_format.eImageFilter = OMX_ImageFilterPosterise;
+    //image_format.eImageFilter = OMX_ImageFilterCartoon;
+    //image_format.eImageFilter = OMX_ImageFilterFilm;
+    //image_format.eImageFilter = OMX_ImageFilterBlur;
+    //image_format.eImageFilter = OMX_ImageFilterPastel;
+    //image_format.eImageFilter = OMX_ImageFilterOilPaint;
+    //image_format.eImageFilter = OMX_ImageFilterSketch;
     //image_format.eImageFilter = OMX_ImageFilterDeInterlaceLineDouble;
-    //image_format.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
+    image_format.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
     //image_format.eImageFilter = OMX_ImageFilterDeInterlaceFast;
     //image_format.eImageFilter = OMX_ImageFilterNone;
 
@@ -253,7 +259,7 @@ int video_deinterlace_test(void)
         return 1;
     }
 
-    if(ilclient_setup_tunnel(tunnel, 0, 0) != 0)
+    if (ilclient_setup_tunnel(tunnel, 0, 0) != 0)
     {
         fprintf(stderr, "Error: ilclient_setup_tunnel(+0) failed!\n");
         return 1;
@@ -262,7 +268,7 @@ int video_deinterlace_test(void)
     ilclient_change_component_state(video_scheduler, OMX_StateExecuting);
 
   // now setup tunnel to video_render
-    if(ilclient_setup_tunnel(tunnel+1, 0, 1000) != 0)
+    if (ilclient_setup_tunnel(tunnel+1, 0, 1000) != 0)
     {
         fprintf(stderr, "Error: ilclient_setup_tunnel(+1) failed!\n");
         return 1;
@@ -275,7 +281,7 @@ int video_deinterlace_test(void)
     int first_packet = 1;
     int dts = 0; // simulation of time stamps (incremented after each frame)
 
-    while((buf = ilclient_get_input_buffer(image_fx, 190, 1)) != NULL)
+    while ((buf = ilclient_get_input_buffer(image_fx, 190, 1)) != NULL)
     {
         unsigned char *imagePartPtr = buf->pBuffer;
         int width = portdef.format.image.nFrameWidth;
@@ -292,7 +298,7 @@ int video_deinterlace_test(void)
         {
             imagePartPtr += data_len;
 
-            if(data_len < sizeToRead)
+            if (data_len < sizeToRead)
             {
                 sizeToRead -= data_len;
                 continue;
@@ -302,7 +308,7 @@ int video_deinterlace_test(void)
                 imagePartPtr += (linesize - width);
                 sizeToRead = width;
 
-                if(++row == height)  // have complete Y ?
+                if (++row == height)  // have complete Y ?
                    break;
             }
         }
@@ -314,7 +320,7 @@ int video_deinterlace_test(void)
         {
             imagePartPtr += data_len;
 
-            if(data_len < sizeToRead)
+            if (data_len < sizeToRead)
             {
                 sizeToRead -= data_len;
                 continue;
@@ -331,14 +337,19 @@ int video_deinterlace_test(void)
             }
         }
 
-        if(!data_len)
+        if (!data_len)
             break;
 
         buf->nFilledLen = buf->nAllocLen;
         buf->nOffset = 0;
-        buf->nFlags = 0;
+        if (image_format.eImageFilter == OMX_ImageFilterDeInterlaceAdvanced ||
+            image_format.eImageFilter == OMX_ImageFilterDeInterlaceFast ||
+            image_format.eImageFilter == OMX_ImageFilterDeInterlaceLineDouble)
+            buf->nFlags = OMX_BUFFERFLAG_INTERLACED | OMX_BUFFERFLAG_TOP_FIELD_FIRST;
+        else
+            buf->nFlags = 0;
 
-        if(first_packet)
+        if (first_packet)
         {
              buf->nFlags = OMX_BUFFERFLAG_STARTTIME;
              first_packet = 0;
@@ -353,7 +364,7 @@ int video_deinterlace_test(void)
            dts += 1000000/FPS;  // intra frame delay in [us]
         }
 
-        if(OMX_EmptyThisBuffer(ILC_GET_HANDLE(image_fx), buf) != OMX_ErrorNone)
+        if (OMX_EmptyThisBuffer(ILC_GET_HANDLE(image_fx), buf) != OMX_ErrorNone)
         {
             fprintf(stderr, "Error: OMX_EmptyThisBuffer(image_fx) failed!\n");
             break;
@@ -365,7 +376,7 @@ int video_deinterlace_test(void)
     buf->nFilledLen = 0;
     buf->nFlags = OMX_BUFFERFLAG_TIME_UNKNOWN | OMX_BUFFERFLAG_EOS;
 
-    if(OMX_EmptyThisBuffer(ILC_GET_HANDLE(image_fx), buf) != OMX_ErrorNone)
+    if (OMX_EmptyThisBuffer(ILC_GET_HANDLE(image_fx), buf) != OMX_ErrorNone)
     {
         fprintf(stderr, "Error: OMX_EmptyThisBuffer(image_fx, OMX_BUFFERFLAG_EOS) failed!\n");
     }
